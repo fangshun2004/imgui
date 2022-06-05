@@ -213,30 +213,30 @@ void*                           GImGuiDemoMarkerCallbackUserData = NULL;
 void ImGui::ShowUserGuide()
 {
     ImGuiIO& io = ImGui::GetIO();
-    ImGui::BulletText("Double-click on title bar to collapse window.");
+    ImGui::BulletText("双击标题栏以折叠窗口。.");
     ImGui::BulletText(
-        "Click and drag on lower corner to resize window\n"
-        "(double-click to auto fit window to its contents).");
-    ImGui::BulletText("CTRL+Click on a slider or drag box to input value as text.");
-    ImGui::BulletText("TAB/SHIFT+TAB to cycle through keyboard editable fields.");
-	ImGui::BulletText("CTRL+Tab to select a window.");
+        "单击并拖动下角以调整窗口大小\n"
+        "(双击以自动使窗口适应其内容).");
+    ImGui::BulletText("按住 Ctrl 键并单击滑块或拖动框以文本形式输入值.");
+    ImGui::BulletText("TAB/SHIFT+TAB 在键盘可编辑的字段中循环切换.");
+	ImGui::BulletText("CTRL+Tab 以选择窗口.");
 	if (io.FontAllowUserScaling)
-        ImGui::BulletText("CTRL+Mouse Wheel to zoom window contents.");
-    ImGui::BulletText("While inputing text:\n");
+        ImGui::BulletText("CTRL+Mouse 滚轮缩放窗口内容.");
+    ImGui::BulletText("输入文本时:\n");
     ImGui::Indent();
-    ImGui::BulletText("CTRL+Left/Right to word jump.");
-    ImGui::BulletText("CTRL+A or double-click to select all.");
-    ImGui::BulletText("CTRL+X/C/V to use clipboard cut/copy/paste.");
-    ImGui::BulletText("CTRL+Z,CTRL+Y to undo/redo.");
-    ImGui::BulletText("ESCAPE to revert.");
+    ImGui::BulletText("CTRL+左/右跳转.");
+    ImGui::BulletText("CTRL+A 或双击以全选.");
+    ImGui::BulletText("CTRL+X/C/V 以使用剪贴板剪切/复制/粘贴.");
+    ImGui::BulletText("CTRL+Z，CTRL+Y 以撤消/重做.");
+    ImGui::BulletText("ESCAPE 以恢复.");
     ImGui::Unindent();
-    ImGui::BulletText("With keyboard navigation enabled:");
+    ImGui::BulletText("启用键盘导航:");
     ImGui::Indent();
-    ImGui::BulletText("Arrow keys to navigate.");
-    ImGui::BulletText("Space to activate a widget.");
-    ImGui::BulletText("Return to input text into a widget.");
-    ImGui::BulletText("Escape to deactivate a widget, close popup, exit child window.");
-    ImGui::BulletText("Alt to jump to the menu layer of a window.");
+    ImGui::BulletText("用于导航的箭头键.");
+    ImGui::BulletText("用于激活小部件的空间.");
+    ImGui::BulletText("返回到微件中的输入文本.");
+    ImGui::BulletText("Escape 以停用小部件，关闭弹出窗口，退出子窗口.");
+    ImGui::BulletText("Alt 用于跳转到窗口菜单图层.");
     ImGui::Unindent();
 }
 
@@ -267,7 +267,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
 {
     // Exceptionally add an extra assert here for people confused about initial Dear ImGui setup
     // Most ImGui functions would normally just crash if the context is missing.
-    IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
+    IM_ASSERT(ImGui::GetCurrentContext() != NULL && "缺少亲爱的imgui上下文。参考示例应用!");
 
     // Examples Apps (accessible from the "Examples" menu)
     static bool show_app_main_menu_bar = false;
@@ -311,7 +311,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
     if (show_app_about)         { ImGui::ShowAboutWindow(&show_app_about); }
     if (show_app_style_editor)
     {
-        ImGui::Begin("Dear ImGui Style Editor", &show_app_style_editor);
+        ImGui::Begin("亲爱的ImGui风格编辑器", &show_app_style_editor);
         ImGui::ShowStyleEditor();
         ImGui::End();
     }
@@ -7358,7 +7358,7 @@ static void ShowExampleAppSimpleOverlay(bool* p_open)
 static void ShowExampleAppFullscreen(bool* p_open)
 {
     static bool use_work_area = true;
-    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings;
+    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
 
     // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
     // Based on your use case you may want one of the other.
