@@ -4184,7 +4184,7 @@ static const char Karla_Regular_font_compressed_data_base85[15900 + 1] =
 
 static const char* GetDefaultCompressedFontDataTTFBase85()
 {
-    return Karla_Regular_font_compressed_data_base85;
+    return {0};
 }
 
 #endif // #ifndef IMGUI_DISABLE
