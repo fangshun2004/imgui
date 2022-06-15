@@ -12359,8 +12359,8 @@ void ImGui::ShowMetricsWindow(bool* p_open)
         MetricsHelpMarker("您也可以从代码中调用ImGui::ShowStackToolWindow().");
 
 
-        Checkbox(u8"按顺序显示窗口\n", &cfg->ShowWindowsBeginOrder);
-        Checkbox(u8"显示矩形窗口", &cfg->ShowWindowsRects);
+        Checkbox("按顺序显示窗口\n", &cfg->ShowWindowsBeginOrder);
+        Checkbox("显示矩形窗口", &cfg->ShowWindowsRects);
         SameLine();
         SetNextItemWidth(GetFontSize() * 12);
         cfg->ShowWindowsRects |= Combo("##show_windows_rect_type", &cfg->ShowWindowsRectsType, wrt_rects_names, WRT_Count, WRT_Count);
@@ -12436,9 +12436,9 @@ void ImGui::ShowMetricsWindow(bool* p_open)
     {
         //SetNextItemOpen(true, ImGuiCond_Once);
 
-        DebugNodeWindowsList(&g.Windows, u8"按显示顺序\n");
-        DebugNodeWindowsList(&g.WindowsFocusOrder, u8"按焦点 (root windows)");
-        if (TreeNode(u8"按提交顺序 (开始堆栈)"))
+        DebugNodeWindowsList(&g.Windows, "按显示顺序\n");
+        DebugNodeWindowsList(&g.WindowsFocusOrder, "按焦点 (root windows)");
+        if (TreeNode("按提交顺序 (开始堆栈)"))
         {
             // Here we display windows in their submitted order/hierarchy, however note that the Begin stack doesn't constitute a Parent<>Child relationship!
             ImVector<ImGuiWindow*>& temp_buffer = g.WindowsTempSortBuffer;
@@ -12460,11 +12460,11 @@ void ImGui::ShowMetricsWindow(bool* p_open)
     for (int viewport_i = 0; viewport_i < g.Viewports.Size; viewport_i++)
         drawlist_count += g.Viewports[viewport_i]->DrawDataBuilder.GetDrawListCount();
 
-    if (TreeNode(u8"绘制列表", "绘制列表 (%d)", drawlist_count))
+    if (TreeNode("绘制列表", "绘制列表 (%d)", drawlist_count))
     {
 
-        Checkbox(u8"悬停时显示ImDrawCmd网格", &cfg->ShowDrawCmdMesh);
-        Checkbox(u8"悬停时显示ImDrawCmd边界框\n", &cfg->ShowDrawCmdBoundingBoxes);
+        Checkbox("悬停时显示ImDrawCmd网格", &cfg->ShowDrawCmdMesh);
+        Checkbox("悬停时显示ImDrawCmd边界框\n", &cfg->ShowDrawCmdBoundingBoxes);
         for (int viewport_i = 0; viewport_i < g.Viewports.Size; viewport_i++)
         {
             ImGuiViewportP* viewport = g.Viewports[viewport_i];
@@ -12546,18 +12546,18 @@ void ImGui::ShowMetricsWindow(bool* p_open)
 
     // Settings
 
-    if (TreeNode(u8"设置"))
+    if (TreeNode("设置"))
     {
 
-        if (SmallButton(u8"清除"))
+        if (SmallButton("清除"))
             ClearIniSettings();
         SameLine();
 
-        if (SmallButton(u8"保存到内存\n"))
+        if (SmallButton("保存到内存\n"))
             SaveIniSettingsToMemory();
         SameLine();
 
-        if (SmallButton(u8"保存到硬盘\n"))
+        if (SmallButton("保存到硬盘\n"))
             SaveIniSettingsToDisk(g.IO.IniFilename);
         SameLine();
         if (g.IO.IniFilename)
@@ -12851,7 +12851,7 @@ void ImGui::DebugNodeFont(ImFont* font)
     // Display preview text
     PushFont(font);
 
-    Text(u8"敏捷的棕色狐狸跳过懒惰的狗\n");
+    Text("敏捷的棕色狐狸跳过懒惰的狗\n");
     PopFont();
 
     // Display details
@@ -12859,7 +12859,6 @@ void ImGui::DebugNodeFont(ImFont* font)
 
     DragFloat("字体比例", &font->Scale, 0.005f, 0.3f, 2.0f, "%.1f");
     SameLine(); MetricsHelpMarker(
-
         "请注意,默认嵌入字体并不意味着要缩放.\n\n"
         "字体当前在构建图集时以给定大小呈现为位图. "
         "您可能会对它们进行过度采样，以便在缩放时获得一定的灵活性. "
