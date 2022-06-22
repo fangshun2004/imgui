@@ -1,4 +1,4 @@
-ï»¿// dear imgui, v1.88 WIP
+// dear imgui, v1.88
 // (drawing and font code)
 
 /*
@@ -1982,13 +1982,13 @@ ImFontAtlas::ImFontAtlas()
 
 ImFontAtlas::~ImFontAtlas()
 {
-    IM_ASSERT(!Locked && "æ— æ³•ä¿®æ”¹ NewFrame() å’Œ EndFrame/Render() ä¹‹é—´é”å®šçš„ ImFontAtlas()!");
+    IM_ASSERT(!Locked && "ÎŞ·¨ĞŞ¸Ä NewFrame() ºÍ EndFrame/Render() Ö®¼äËø¶¨µÄ ImFontAtlas()!");
     Clear();
 }
 
 void    ImFontAtlas::ClearInputData()
 {
-    IM_ASSERT(!Locked && "æ— æ³•ä¿®æ”¹ NewFrame() å’Œ EndFrame/Render() ä¹‹é—´é”å®šçš„ ImFontAtlas()!");
+    IM_ASSERT(!Locked && "ÎŞ·¨ĞŞ¸Ä NewFrame() ºÍ EndFrame/Render() Ö®¼äËø¶¨µÄ ImFontAtlas()!");
     for (int i = 0; i < ConfigData.Size; i++)
         if (ConfigData[i].FontData && ConfigData[i].FontDataOwnedByAtlas)
         {
@@ -2011,7 +2011,7 @@ void    ImFontAtlas::ClearInputData()
 
 void    ImFontAtlas::ClearTexData()
 {
-    IM_ASSERT(!Locked && "æ— æ³•ä¿®æ”¹ NewFrame() å’Œ EndFrame/Render() ä¹‹é—´é”å®šçš„ ImFontAtlas()!");
+    IM_ASSERT(!Locked && "ÎŞ·¨ĞŞ¸Ä NewFrame() ºÍ EndFrame/Render() Ö®¼äËø¶¨µÄ ImFontAtlas()!");
     if (TexPixelsAlpha8)
         IM_FREE(TexPixelsAlpha8);
     if (TexPixelsRGBA32)
@@ -2024,7 +2024,7 @@ void    ImFontAtlas::ClearTexData()
 
 void    ImFontAtlas::ClearFonts()
 {
-    IM_ASSERT(!Locked && "æ— æ³•ä¿®æ”¹ NewFrame() å’Œ EndFrame/Render() ä¹‹é—´é”å®šçš„ ImFontAtlas()!");
+    IM_ASSERT(!Locked && "ÎŞ·¨ĞŞ¸Ä NewFrame() ºÍ EndFrame/Render() Ö®¼äËø¶¨µÄ ImFontAtlas()!");
     Fonts.clear_delete();
     TexReady = false;
 }
@@ -2074,7 +2074,7 @@ void    ImFontAtlas::GetTexDataAsRGBA32(unsigned char** out_pixels, int* out_wid
 
 ImFont* ImFontAtlas::AddFont(const ImFontConfig* font_cfg)
 {
-    IM_ASSERT(!Locked && "æ— æ³•ä¿®æ”¹ NewFrame() å’Œ EndFrame/Render() ä¹‹é—´é”å®šçš„ ImFontAtlas()!");
+    IM_ASSERT(!Locked && "ÎŞ·¨ĞŞ¸Ä NewFrame() ºÍ EndFrame/Render() Ö®¼äËø¶¨µÄ ImFontAtlas()!");
     IM_ASSERT(font_cfg->FontData != NULL && font_cfg->FontDataSize > 0);
     IM_ASSERT(font_cfg->SizePixels > 0.0f);
 
@@ -2082,7 +2082,7 @@ ImFont* ImFontAtlas::AddFont(const ImFontConfig* font_cfg)
     if (!font_cfg->MergeMode)
         Fonts.push_back(IM_NEW(ImFont));
     else
-        IM_ASSERT(!Fonts.empty() && "æ— æ³•å°†åˆå¹¶æ¨¡å¼ç”¨äºç¬¬ä¸€ç§å­—ä½“\n"); // When using MergeMode make sure that a font has already been added before. You can use ImGui::GetIO().Fonts->AddFontDefault() to add the default imgui font.
+        IM_ASSERT(!Fonts.empty() && "ÎŞ·¨½«ºÏ²¢Ä£Ê½ÓÃÓÚµÚÒ»ÖÖ×ÖÌå\n"); // When using MergeMode make sure that a font has already been added before. You can use ImGui::GetIO().Fonts->AddFontDefault() to add the default imgui font.
 
     ConfigData.push_back(*font_cfg);
     ImFontConfig& new_font_cfg = ConfigData.back();
@@ -2144,12 +2144,12 @@ ImFont* ImFontAtlas::AddFontDefault(const ImFontConfig* font_cfg_template)
 
 ImFont* ImFontAtlas::AddFontFromFileTTF(const char* filename, float size_pixels, const ImFontConfig* font_cfg_template, const ImWchar* glyph_ranges)
 {
-    IM_ASSERT(!Locked && "æ— æ³•ä¿®æ”¹ NewFrame() å’Œ EndFrame/Render() ä¹‹é—´é”å®šçš„ ImFontAtlas()!");
+    IM_ASSERT(!Locked && "ÎŞ·¨ĞŞ¸Ä NewFrame() ºÍ EndFrame/Render() Ö®¼äËø¶¨µÄ ImFontAtlas()!");
     size_t data_size = 0;
     void* data = ImFileLoadToMemory(filename, "rb", &data_size, 0);
     if (!data)
     {
-        IM_ASSERT_USER_ERROR(0, "æ— æ³•åŠ è½½å­—ä½“æ–‡ä»¶!");
+        IM_ASSERT_USER_ERROR(0, "ÎŞ·¨¼ÓÔØ×ÖÌåÎÄ¼ş!");
         return NULL;
     }
     ImFontConfig font_cfg = font_cfg_template ? *font_cfg_template : ImFontConfig();
@@ -2166,7 +2166,7 @@ ImFont* ImFontAtlas::AddFontFromFileTTF(const char* filename, float size_pixels,
 // NB: Transfer ownership of 'ttf_data' to ImFontAtlas, unless font_cfg_template->FontDataOwnedByAtlas == false. Owned TTF buffer will be deleted after Build().
 ImFont* ImFontAtlas::AddFontFromMemoryTTF(void* ttf_data, int ttf_size, float size_pixels, const ImFontConfig* font_cfg_template, const ImWchar* glyph_ranges)
 {
-    IM_ASSERT(!Locked && "æ— æ³•ä¿®æ”¹ NewFrame() å’Œ EndFrame/Render() ä¹‹é—´é”å®šçš„ ImFontAtlas()!");
+    IM_ASSERT(!Locked && "ÎŞ·¨ĞŞ¸Ä NewFrame() ºÍ EndFrame/Render() Ö®¼äËø¶¨µÄ ImFontAtlas()!");
     ImFontConfig font_cfg = font_cfg_template ? *font_cfg_template : ImFontConfig();
     IM_ASSERT(font_cfg.FontData == NULL);
     font_cfg.FontData = ttf_data;
@@ -2260,7 +2260,7 @@ bool ImFontAtlas::GetMouseCursorTexData(ImGuiMouseCursor cursor_type, ImVec2* ou
 
 bool    ImFontAtlas::Build()
 {
-    IM_ASSERT(!Locked && "æ— æ³•ä¿®æ”¹ NewFrame() å’Œ EndFrame/Render() ä¹‹é—´é”å®šçš„ ImFontAtlas()!");
+    IM_ASSERT(!Locked && "ÎŞ·¨ĞŞ¸Ä NewFrame() ºÍ EndFrame/Render() Ö®¼äËø¶¨µÄ ImFontAtlas()!");
 
     // Default font is none are specified
     if (ConfigData.Size == 0)
@@ -2382,7 +2382,7 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
         }
         // Initialize helper structure for font loading and verify that the TTF/OTF data is correct
         const int font_offset = stbtt_GetFontOffsetForIndex((unsigned char*)cfg.FontData, cfg.FontNo);
-        IM_ASSERT(font_offset >= 0 && "FontData ä¸æ­£ç¡®ï¼Œæˆ–è€…æ‰¾ä¸åˆ° FontNo.");
+        IM_ASSERT(font_offset >= 0 && "FontData ²»ÕıÈ·£¬»òÕßÕÒ²»µ½ FontNo.");
         if (!stbtt_InitFont(&src_tmp.FontInfo, (unsigned char*)cfg.FontData, font_offset))
             return false;
 

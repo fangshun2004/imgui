@@ -1,4 +1,4 @@
-ï»¿// dear imgui, v1.88 WIP
+// dear imgui, v1.88
 // (widgets code)
 
 /*
@@ -1540,7 +1540,7 @@ void ImGui::ShrinkWidths(ImGuiShrinkWidthItem* items, int count, float width_exc
         width_excess -= width_to_remove_per_item * count_same_width;
     }
 
-    // Round width and redistribute remainder left-to-right (could make it an option of the function?)
+    // Round width and redistribute remainder
     // Ensure that e.g. the right-most tab of a shrunk tab-bar always reaches exactly at the same distance from the right-most edge of the tab bar separator.
     width_excess = 0.0f;
     for (int n = 0; n < count; n++)
@@ -1549,10 +1549,13 @@ void ImGui::ShrinkWidths(ImGuiShrinkWidthItem* items, int count, float width_exc
         width_excess += items[n].Width - width_rounded;
         items[n].Width = width_rounded;
     }
-    if (width_excess > 0.0f)
+    while (width_excess > 0.0f)
         for (int n = 0; n < count; n++)
-            if (items[n].Index < (int)(width_excess + 0.01f))
+            if (items[n].Width + 1.0f <= items[n].InitialWidth)
+            {
                 items[n].Width += 1.0f;
+                width_excess -= 1.0f;
+            }
 }
 
 //-------------------------------------------------------------------------
@@ -3172,7 +3175,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
     ImGuiSliderFlags slider_flags = ImGuiSliderFlags_None;
     if (power != 1.0f)
     {
-        IM_ASSERT(power == 1.0f && "ä½¿ç”¨ ImGuiSliderFlags_Logarithmicæ ‡å¿—ä½è°ƒç”¨å‡½æ•°,è€Œä¸æ˜¯ä½¿ç”¨æ—§çš„ 'float power' å‡½æ•°!");
+        IM_ASSERT(power == 1.0f && "Ê¹ÓÃ ImGuiSliderFlags_Logarithmic±êÖ¾Î»µ÷ÓÃº¯Êý,¶ø²»ÊÇÊ¹ÓÃ¾ÉµÄ 'float power' º¯Êý!");
         slider_flags |= ImGuiSliderFlags_Logarithmic;   // Fallback for non-asserting paths
     }
     return SliderScalar(label, data_type, p_data, p_min, p_max, format, slider_flags);
@@ -3183,7 +3186,7 @@ bool ImGui::SliderScalarN(const char* label, ImGuiDataType data_type, void* v, i
     ImGuiSliderFlags slider_flags = ImGuiSliderFlags_None;
     if (power != 1.0f)
     {
-        IM_ASSERT(power == 1.0f && "ä½¿ç”¨ ImGuiSliderFlags_Logarithmicæ ‡å¿—ä½è°ƒç”¨å‡½æ•°,è€Œä¸æ˜¯ä½¿ç”¨æ—§çš„ 'float power' å‡½æ•°!");
+        IM_ASSERT(power == 1.0f && "Ê¹ÓÃ ImGuiSliderFlags_Logarithmic±êÖ¾Î»µ÷ÓÃº¯Êý,¶ø²»ÊÇÊ¹ÓÃ¾ÉµÄ 'float power' º¯Êý!");
         slider_flags |= ImGuiSliderFlags_Logarithmic;   // Fallback for non-asserting paths
     }
     return SliderScalarN(label, data_type, v, components, v_min, v_max, format, slider_flags);
@@ -6470,7 +6473,7 @@ void ImGui::EndListBox()
 {
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
-    IM_ASSERT((window->Flags & ImGuiWindowFlags_ChildWindow) && "ä¸åŒ¹é…çš„ BeginListBox/EndListBox è°ƒç”¨.æ‚¨æ˜¯å¦æµ‹è¯•äº† BeginListBox çš„è¿”å›žå€¼?");
+    IM_ASSERT((window->Flags & ImGuiWindowFlags_ChildWindow) && "²»Æ¥ÅäµÄ BeginListBox/EndListBox µ÷ÓÃ.ÄúÊÇ·ñ²âÊÔÁË BeginListBox µÄ·µ»ØÖµ?");
     IM_UNUSED(window);
 
     EndChildFrame();
@@ -7415,7 +7418,7 @@ void    ImGui::EndTabBar()
     ImGuiTabBar* tab_bar = g.CurrentTabBar;
     if (tab_bar == NULL)
     {
-        IM_ASSERT_USER_ERROR(tab_bar != NULL, "ä¸åŒ¹é…çš„ BeginTabBar()/EndTabBar()!");
+        IM_ASSERT_USER_ERROR(tab_bar != NULL, "²»Æ¥ÅäµÄ BeginTabBar()/EndTabBar()!");
         return;
     }
 
@@ -7548,7 +7551,7 @@ static void ImGui::TabBarLayout(ImGuiTabBar* tab_bar)
         // and we cannot wait for the next BeginTabItem() call. We cannot compute this width within TabBarAddTab() because font size depends on the active window.
         const char* tab_name = tab_bar->GetTabName(tab);
         const bool has_close_button = (tab->Flags & ImGuiTabItemFlags_NoCloseButton) ? false : true;
-        tab->ContentWidth = TabItemCalcSize(tab_name, has_close_button).x;
+        tab->ContentWidth = (tab->RequestedWidth > 0.0f) ? tab->RequestedWidth : TabItemCalcSize(tab_name, has_close_button).x;
 
         int section_n = TabItemGetSectionIdx(tab);
         ImGuiTabBarSection* section = &sections[section_n];
@@ -7557,9 +7560,9 @@ static void ImGui::TabBarLayout(ImGuiTabBar* tab_bar)
 
         // Store data so we can build an array sorted by width if we need to shrink tabs down
         IM_MSVC_WARNING_SUPPRESS(6385);
-        int shrink_buffer_index = shrink_buffer_indexes[section_n]++;
-        g.ShrinkWidthBuffer[shrink_buffer_index].Index = tab_n;
-        g.ShrinkWidthBuffer[shrink_buffer_index].Width = tab->ContentWidth;
+        ImGuiShrinkWidthItem* shrink_width_item = &g.ShrinkWidthBuffer[shrink_buffer_indexes[section_n]++];
+        shrink_width_item->Index = tab_n;
+        shrink_width_item->Width = shrink_width_item->InitialWidth = tab->ContentWidth;
 
         IM_ASSERT(tab->ContentWidth > 0.0f);
         tab->Width = tab->ContentWidth;
@@ -7977,7 +7980,7 @@ bool    ImGui::BeginTabItem(const char* label, bool* p_open, ImGuiTabItemFlags f
     ImGuiTabBar* tab_bar = g.CurrentTabBar;
     if (tab_bar == NULL)
     {
-        IM_ASSERT_USER_ERROR(tab_bar, "éœ€è¦åœ¨ BeginTabBar() å’Œ EndTabBar() ä¹‹é—´è°ƒç”¨!");
+        IM_ASSERT_USER_ERROR(tab_bar, "ÐèÒªÔÚ BeginTabBar() ºÍ EndTabBar() Ö®¼äµ÷ÓÃ!");
         return false;
     }
     IM_ASSERT(!(flags & ImGuiTabItemFlags_Button)); // BeginTabItem() Can't be used with button flags, use TabItemButton() instead!
@@ -8001,7 +8004,7 @@ void    ImGui::EndTabItem()
     ImGuiTabBar* tab_bar = g.CurrentTabBar;
     if (tab_bar == NULL)
     {
-        IM_ASSERT_USER_ERROR(tab_bar != NULL, "éœ€è¦åœ¨ BeginTabBar() å’Œ EndTabBar() ä¹‹é—´è°ƒç”¨!");
+        IM_ASSERT_USER_ERROR(tab_bar != NULL, "ÐèÒªÔÚ BeginTabBar() ºÍ EndTabBar() Ö®¼äµ÷ÓÃ!");
         return;
     }
     IM_ASSERT(tab_bar->LastTabItemIdx >= 0);
@@ -8020,7 +8023,7 @@ bool    ImGui::TabItemButton(const char* label, ImGuiTabItemFlags flags)
     ImGuiTabBar* tab_bar = g.CurrentTabBar;
     if (tab_bar == NULL)
     {
-        IM_ASSERT_USER_ERROR(tab_bar != NULL, "éœ€è¦åœ¨ BeginTabBar() å’Œ EndTabBar() ä¹‹é—´è°ƒç”¨!");
+        IM_ASSERT_USER_ERROR(tab_bar != NULL, "ÐèÒªÔÚ BeginTabBar() ºÍ EndTabBar() Ö®¼äµ÷ÓÃ!");
         return false;
     }
     return TabItemEx(tab_bar, label, NULL, flags | ImGuiTabItemFlags_Button | ImGuiTabItemFlags_NoReorder);
@@ -8029,10 +8032,13 @@ bool    ImGui::TabItemButton(const char* label, ImGuiTabItemFlags flags)
 bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, ImGuiTabItemFlags flags)
 {
     // Layout whole tab bar if not already done
-    if (tab_bar->WantLayout)
-        TabBarLayout(tab_bar);
-
     ImGuiContext& g = *GImGui;
+    if (tab_bar->WantLayout)
+    {
+        ImGuiNextItemData backup_next_item_data = g.NextItemData;
+        TabBarLayout(tab_bar);
+        g.NextItemData = backup_next_item_data;
+    }
     ImGuiWindow* window = g.CurrentWindow;
     if (window->SkipItems)
         return false;
@@ -8058,9 +8064,6 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
     else if (p_open == NULL)
         flags |= ImGuiTabItemFlags_NoCloseButton;
 
-    // Calculate tab contents size
-    ImVec2 size = TabItemCalcSize(label, p_open != NULL);
-
     // Acquire tab data
     ImGuiTabItem* tab = TabBarFindTabByID(tab_bar, id);
     bool tab_is_new = false;
@@ -8069,11 +8072,17 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
         tab_bar->Tabs.push_back(ImGuiTabItem());
         tab = &tab_bar->Tabs.back();
         tab->ID = id;
-        tab->Width = size.x;
-        tab_bar->TabsAddedNew = true;
-        tab_is_new = true;
+        tab_bar->TabsAddedNew = tab_is_new = true;
     }
     tab_bar->LastTabItemIdx = (ImS16)tab_bar->Tabs.index_from_ptr(tab);
+
+    // Calculate tab contents size
+    ImVec2 size = TabItemCalcSize(label, p_open != NULL);
+    tab->RequestedWidth = -1.0f;
+    if (g.NextItemData.Flags & ImGuiNextItemDataFlags_HasWidth)
+        size.x = tab->RequestedWidth = g.NextItemData.Width;
+    if (tab_is_new)
+        tab->Width = size.x;
     tab->ContentWidth = size.x;
     tab->BeginOrder = tab_bar->TabsActiveCount++;
 
@@ -8089,13 +8098,14 @@ bool    ImGui::TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, 
     tab_bar->TabsNames.append(label, label + strlen(label) + 1);
 
     // Update selected tab
-    if (tab_appearing && (tab_bar->Flags & ImGuiTabBarFlags_AutoSelectNewTabs) && tab_bar->NextSelectedTabId == 0)
-        if (!tab_bar_appearing || tab_bar->SelectedTabId == 0)
-            if (!is_tab_button)
+    if (!is_tab_button)
+    {
+        if (tab_appearing && (tab_bar->Flags & ImGuiTabBarFlags_AutoSelectNewTabs) && tab_bar->NextSelectedTabId == 0)
+            if (!tab_bar_appearing || tab_bar->SelectedTabId == 0)
                 tab_bar->NextSelectedTabId = id;  // New tabs gets activated
-    if ((flags & ImGuiTabItemFlags_SetSelected) && (tab_bar->SelectedTabId != id)) // SetSelected can only be passed on explicit tab bar
-        if (!is_tab_button)
+        if ((flags & ImGuiTabItemFlags_SetSelected) && (tab_bar->SelectedTabId != id)) // _SetSelected can only be passed on explicit tab bar
             tab_bar->NextSelectedTabId = id;
+    }
 
     // Lock visibility
     // (Note: tab_contents_visible != tab_selected... because CTRL+TAB operations may preview some tabs without selecting them!)

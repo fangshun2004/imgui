@@ -1,4 +1,4 @@
-ï»¿// dear imgui, v1.88 WIP
+// dear imgui, v1.88
 // (tables and columns code)
 
 /*
@@ -1201,7 +1201,7 @@ void    ImGui::EndTable()
 {
     ImGuiContext& g = *GImGui;
     ImGuiTable* table = g.CurrentTable;
-    IM_ASSERT(table != NULL && "ä»…å½“ BeginTable() è¿”å›ž true æ—¶æ‰è°ƒç”¨ EndTable()");
+    IM_ASSERT(table != NULL && "½öµ± BeginTable() ·µ»Ø true Ê±²Åµ÷ÓÃ EndTable()");
 
     // This assert would be very useful to catch a common error... unfortunately it would probably trigger in some
     // cases, and for consistency user may sometimes output empty tables (and still benefit from e.g. outer border)
@@ -1329,8 +1329,8 @@ void    ImGui::EndTable()
     }
 
     // Pop from id stack
-    IM_ASSERT_USER_ERROR(inner_window->IDStack.back() == table->ID + table->InstanceCurrent, "ä¸åŒ¹é… PushID/PopID!");
-    IM_ASSERT_USER_ERROR(outer_window->DC.ItemWidthStack.Size >= temp_data->HostBackupItemWidthStackSize, "å¤ªå¤šçš„ PopItemWidth!");
+    IM_ASSERT_USER_ERROR(inner_window->IDStack.back() == table->ID + table->InstanceCurrent, "²»Æ¥Åä PushID/PopID!");
+    IM_ASSERT_USER_ERROR(outer_window->DC.ItemWidthStack.Size >= temp_data->HostBackupItemWidthStackSize, "Ì«¶àµÄ PopItemWidth!");
     PopID();
 
     // Restore window data that we modified
@@ -1410,12 +1410,12 @@ void ImGui::TableSetupColumn(const char* label, ImGuiTableColumnFlags flags, flo
 {
     ImGuiContext& g = *GImGui;
     ImGuiTable* table = g.CurrentTable;
-    IM_ASSERT(table != NULL && "éœ€è¦åœ¨ TableSetupColumn() ä¹‹åŽè°ƒç”¨ BeginTable()!");
-    IM_ASSERT(table->IsLayoutLocked == false && "éœ€è¦åœ¨ç¬¬ä¸€è¡Œä¹‹å‰è°ƒç”¨è°ƒç”¨ TableSetupColumn()!");
-    IM_ASSERT((flags & ImGuiTableColumnFlags_StatusMask_) == 0 && "å°† StatusMask å€¼ä¼ é€’ç»™ TableSetupColumn() æ˜¯éžæ³•çš„");
+    IM_ASSERT(table != NULL && "ÐèÒªÔÚ TableSetupColumn() Ö®ºóµ÷ÓÃ BeginTable()!");
+    IM_ASSERT(table->IsLayoutLocked == false && "ÐèÒªÔÚµÚÒ»ÐÐÖ®Ç°µ÷ÓÃµ÷ÓÃ TableSetupColumn()!");
+    IM_ASSERT((flags & ImGuiTableColumnFlags_StatusMask_) == 0 && "½« StatusMask Öµ´«µÝ¸ø TableSetupColumn() ÊÇ·Ç·¨µÄ");
     if (table->DeclColumnsCount >= table->ColumnsCount)
     {
-        IM_ASSERT_USER_ERROR(table->DeclColumnsCount < table->ColumnsCount, "è°ƒç”¨ TableSetupColumn() æ¬¡æ•°å¤ªå¤š!");
+        IM_ASSERT_USER_ERROR(table->DeclColumnsCount < table->ColumnsCount, "µ÷ÓÃ TableSetupColumn() ´ÎÊýÌ«¶à!");
         return;
     }
 
@@ -1425,7 +1425,7 @@ void ImGui::TableSetupColumn(const char* label, ImGuiTableColumnFlags flags, flo
     // Assert when passing a width or weight if policy is entirely left to default, to avoid storing width into weight and vice-versa.
     // Give a grace to users of ImGuiTableFlags_ScrollX.
     if (table->IsDefaultSizingPolicy && (flags & ImGuiTableColumnFlags_WidthMask_) == 0 && (flags & ImGuiTableFlags_ScrollX) == 0)
-        IM_ASSERT(init_width_or_weight <= 0.0f && "ä»…å½“åœ¨ width/weight ä¸­æ˜¾å¼è®¾ç½®äº†å¤§å°è°ƒæ•´ç­–ç•¥æ—¶,æ‰èƒ½æŒ‡å®šå®½åº¦/é‡é‡");
+        IM_ASSERT(init_width_or_weight <= 0.0f && "½öµ±ÔÚ width/weight ÖÐÏÔÊ½ÉèÖÃÁË´óÐ¡µ÷Õû²ßÂÔÊ±,²ÅÄÜÖ¸¶¨¿í¶È/ÖØÁ¿");
 
     // When passing a width automatically enforce WidthFixed policy
     // (whereas TableSetupColumnFlags would default to WidthAuto if table is not Resizable)
@@ -1478,8 +1478,8 @@ void ImGui::TableSetupScrollFreeze(int columns, int rows)
 {
     ImGuiContext& g = *GImGui;
     ImGuiTable* table = g.CurrentTable;
-    IM_ASSERT(table != NULL && "éœ€è¦åœ¨ BeginTable() ä¹‹åŽè°ƒç”¨ TableSetupColumn()!");
-    IM_ASSERT(table->IsLayoutLocked == false && "éœ€è¦åœ¨ç¬¬ä¸€è¡Œä¹‹å‰è°ƒç”¨  TableSetupColumn()");
+    IM_ASSERT(table != NULL && "ÐèÒªÔÚ BeginTable() Ö®ºóµ÷ÓÃ TableSetupColumn()!");
+    IM_ASSERT(table->IsLayoutLocked == false && "ÐèÒªÔÚµÚÒ»ÐÐÖ®Ç°µ÷ÓÃ  TableSetupColumn()");
     IM_ASSERT(columns >= 0 && columns < IMGUI_TABLE_MAX_COLUMNS);
     IM_ASSERT(rows >= 0 && rows < 128); // Arbitrary limit
 
@@ -2831,7 +2831,7 @@ void ImGui::TableHeadersRow()
 {
     ImGuiContext& g = *GImGui;
     ImGuiTable* table = g.CurrentTable;
-    IM_ASSERT(table != NULL && "éœ€è¦åœ¨ BeginTable() ä¹‹åŽè°ƒç”¨ TableHeadersRow()!");    
+    IM_ASSERT(table != NULL && "ÐèÒªÔÚ BeginTable() Ö®ºóµ÷ÓÃ TableHeadersRow()!");    
 
     // Layout if not already done (this is automatically done by TableNextRow, we do it here solely to facilitate stepping in debugger as it is frequent to step in TableUpdateLayout)
     if (!table->IsLayoutLocked)
@@ -2877,7 +2877,7 @@ void ImGui::TableHeader(const char* label)
         return;
 
     ImGuiTable* table = g.CurrentTable;
-    IM_ASSERT(table != NULL && "éœ€è¦åœ¨ BeginTable() ä¹‹åŽè°ƒç”¨ TableHeader()!");
+    IM_ASSERT(table != NULL && "ÐèÒªÔÚ BeginTable() Ö®ºóµ÷ÓÃ TableHeader()!");
     IM_ASSERT(table->CurrentColumn != -1);
     const int column_n = table->CurrentColumn;
     ImGuiTableColumn* column = &table->Columns[column_n];
@@ -3054,15 +3054,15 @@ void ImGui::TableDrawContextMenu(ImGuiTable* table)
         if (column != NULL)
         {
             const bool can_resize = !(column->Flags & ImGuiTableColumnFlags_NoResize) && column->IsEnabled;
-            if (MenuItem("é€‚åˆçš„å¤§å°åˆ—###SizeOne", NULL, false, can_resize))
+            if (MenuItem("ÊÊºÏµÄ´óÐ¡ÁÐ###SizeOne", NULL, false, can_resize))
                 TableSetColumnWidthAutoSingle(table, column_n);
         }
 
         const char* size_all_desc;
         if (table->ColumnsEnabledFixedCount == table->ColumnsEnabledCount && (table->Flags & ImGuiTableFlags_SizingMask_) != ImGuiTableFlags_SizingFixedSame)
-            size_all_desc = "è°ƒæ•´æ‰€æœ‰åˆ—çš„å¤§å°ä»¥é€‚åˆ###SizeAll";        // All fixed
+            size_all_desc = "µ÷ÕûËùÓÐÁÐµÄ´óÐ¡ÒÔÊÊºÏ###SizeAll";        // All fixed
         else
-            size_all_desc = "å°†æ‰€æœ‰åˆ—çš„å¤§å°è°ƒæ•´ä¸ºé»˜è®¤å€¼###SizeAll";    // All stretch or mixed
+            size_all_desc = "½«ËùÓÐÁÐµÄ´óÐ¡µ÷ÕûÎªÄ¬ÈÏÖµ###SizeAll";    // All stretch or mixed
         if (MenuItem(size_all_desc, NULL))
             TableSetColumnWidthAutoAll(table);
         want_separator = true;
@@ -3549,12 +3549,12 @@ void ImGui::DebugNodeTable(ImGuiTable* table)
     if (!open)
         return;
     if (table->InstanceCurrent > 0)
-        ImGui::Text("** %d åŒä¸€è¡¨çš„å®žä¾‹ï¼ä¸‹é¢çš„ä¸€äº›æ•°æ®å°†å¼•ç”¨æœ€åŽä¸€ä¸ªå®žä¾‹.", table->InstanceCurrent + 1);
-    bool clear_settings = SmallButton("æ¸…é™¤è®¾ç½®");
-    BulletText("å¤–éƒ¨: Pos: (%.1f,%.1f) Size: (%.1f,%.1f) Sizing: '%s'", table->OuterRect.Min.x, table->OuterRect.Min.y, table->OuterRect.GetWidth(), table->OuterRect.GetHeight(), DebugNodeTableGetSizingPolicyDesc(table->Flags));
-    BulletText("ç»™å®šå®½åº¦çš„åˆ—: %.1f, è‡ªé€‚åº”å®½åº¦: %.1f, InnerWidth: %.1f%s", table->ColumnsGivenWidth, table->ColumnsAutoFitWidth, table->InnerWidth, table->InnerWidth == 0.0f ? " (auto)" : "");
+        ImGui::Text("** %d Í¬Ò»±íµÄÊµÀý£¡ÏÂÃæµÄÒ»Ð©Êý¾Ý½«ÒýÓÃ×îºóÒ»¸öÊµÀý.", table->InstanceCurrent + 1);
+    bool clear_settings = SmallButton("Çå³ýÉèÖÃ");
+    BulletText("Íâ²¿: Pos: (%.1f,%.1f) Size: (%.1f,%.1f) Sizing: '%s'", table->OuterRect.Min.x, table->OuterRect.Min.y, table->OuterRect.GetWidth(), table->OuterRect.GetHeight(), DebugNodeTableGetSizingPolicyDesc(table->Flags));
+    BulletText("¸ø¶¨¿í¶ÈµÄÁÐ: %.1f, ×ÔÊÊÓ¦¿í¶È: %.1f, InnerWidth: %.1f%s", table->ColumnsGivenWidth, table->ColumnsAutoFitWidth, table->InnerWidth, table->InnerWidth == 0.0f ? " (auto)" : "");
     BulletText("CellPaddingX: %.1f, CellSpacingX: %.1f/%.1f, OuterPaddingX: %.1f", table->CellPaddingX, table->CellSpacingX1, table->CellSpacingX2, table->OuterPaddingX);
-    BulletText("HoveredColumnBody: %d, æ‚¬åœçš„åˆ—è¾¹ç•Œ: %d", table->HoveredColumnBody, table->HoveredColumnBorder);
+    BulletText("HoveredColumnBody: %d, ÐüÍ£µÄÁÐ±ß½ç: %d", table->HoveredColumnBody, table->HoveredColumnBorder);
     BulletText("ResizedColumn: %d, ReorderColumn: %d, HeldHeaderColumn: %d", table->ResizedColumn, table->ReorderColumn, table->HeldHeaderColumn);
     //BulletText("BgDrawChannels: %d/%d", 0, table->BgDrawChannelUnfrozen);
     float sum_weights = 0.0f;
@@ -3598,9 +3598,9 @@ void ImGui::DebugNodeTable(ImGuiTable* table)
 
 void ImGui::DebugNodeTableSettings(ImGuiTableSettings* settings)
 {
-    if (!TreeNode((void*)(intptr_t)settings->ID, "è®¾ç½® 0x%08X (%d columns)", settings->ID, settings->ColumnsCount))
+    if (!TreeNode((void*)(intptr_t)settings->ID, "ÉèÖÃ 0x%08X (%d columns)", settings->ID, settings->ColumnsCount))
         return;
-    BulletText("ä¿å­˜æ ‡å¿—: 0x%08X", settings->SaveFlags);
+    BulletText("±£´æ±êÖ¾: 0x%08X", settings->SaveFlags);
     BulletText("ColumnsCount: %d (max %d)", settings->ColumnsCount, settings->ColumnsCountMax);
     for (int n = 0; n < settings->ColumnsCount; n++)
     {
