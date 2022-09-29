@@ -205,7 +205,7 @@ namespace ImStb
 #endif
 
 // Debug Logging for ShowDebugLogWindow(). This is designed for relatively rare events so please don't spam.
-#define IMGUI_DEBUG_LOG(...)            ImGui::DebugLog(__VA_ARGS__);
+#define IMGUI_DEBUG_LOG(...)            ImGui::DebugLog(__VA_ARGS__)
 #define IMGUI_DEBUG_LOG_ACTIVEID(...)   do { if (g.DebugLogFlags & ImGuiDebugLogFlags_EventActiveId) IMGUI_DEBUG_LOG(__VA_ARGS__); } while (0)
 #define IMGUI_DEBUG_LOG_FOCUS(...)      do { if (g.DebugLogFlags & ImGuiDebugLogFlags_EventFocus)    IMGUI_DEBUG_LOG(__VA_ARGS__); } while (0)
 #define IMGUI_DEBUG_LOG_POPUP(...)      do { if (g.DebugLogFlags & ImGuiDebugLogFlags_EventPopup)    IMGUI_DEBUG_LOG(__VA_ARGS__); } while (0)
@@ -334,8 +334,10 @@ IMGUI_API const ImWchar*ImStrbolW(const ImWchar* buf_mid_line, const ImWchar* bu
 IMGUI_API const char*   ImStristr(const char* haystack, const char* haystack_end, const char* needle, const char* needle_end);
 IMGUI_API void          ImStrTrimBlanks(char* str);
 IMGUI_API const char*   ImStrSkipBlank(const char* str);
+IM_MSVC_RUNTIME_CHECKS_OFF
 static inline bool      ImCharIsBlankA(char c)          { return c == ' ' || c == '\t'; }
 static inline bool      ImCharIsBlankW(unsigned int c)  { return c == ' ' || c == '\t' || c == 0x3000; }
+IM_MSVC_RUNTIME_CHECKS_RESTORE
 
 // Helpers: Formatting
 IMGUI_API int           ImFormatString(char* buf, size_t buf_size, const char* fmt, ...) IM_FMTARGS(3);
@@ -1023,7 +1025,7 @@ struct IMGUI_API ImGuiInputTextState
     bool                    CursorFollow;           // set when we want scrolling to follow the current cursor position (not always!)
     bool                    SelectedAllMouseLock;   // after a double-click to select all, we ignore further mouse drags to update selection
     bool                    Edited;                 // edited this frame
-    ImGuiInputTextFlags     Flags;                  // copy of InputText() flags
+    ImGuiInputTextFlags     Flags;                  // copy of InputText() flags. may be used to check if e.g. ImGuiInputTextFlags_Password is set.
 
     ImGuiInputTextState()                   { memset(this, 0, sizeof(*this)); }
     void        ClearText()                 { CurLenW = CurLenA = 0; TextW[0] = 0; TextA[0] = 0; CursorClamp(); }
@@ -1184,8 +1186,8 @@ typedef ImBitArray<ImGuiKey_NamedKey_COUNT, -ImGuiKey_NamedKey_BEGIN>    ImBitAr
 #define ImGuiKey_Aliases_END            (ImGuiKey_MouseWheelY + 1)
 
 // [Internal] Named shortcuts for Navigation
-#define ImGuiKey_NavKeyboardTweakSlow   ImGuiKey_ModCtrl
-#define ImGuiKey_NavKeyboardTweakFast   ImGuiKey_ModShift
+#define ImGuiKey_NavKeyboardTweakSlow   ImGuiMod_Ctrl
+#define ImGuiKey_NavKeyboardTweakFast   ImGuiMod_Shift
 #define ImGuiKey_NavGamepadTweakSlow    ImGuiKey_GamepadL1
 #define ImGuiKey_NavGamepadTweakFast    ImGuiKey_GamepadR1
 #define ImGuiKey_NavGamepadActivate     ImGuiKey_GamepadFaceDown
@@ -1692,7 +1694,7 @@ struct ImGuiContext
     ImGuiActivateFlags      NavActivateFlags;
     ImGuiID                 NavJustMovedToId;                   // Just navigated to this id (result of a successfully MoveRequest).
     ImGuiID                 NavJustMovedToFocusScopeId;         // Just navigated to this focus scope id (result of a successfully MoveRequest).
-    ImGuiModFlags           NavJustMovedToKeyMods;
+    ImGuiKeyChord           NavJustMovedToKeyMods;
     ImGuiID                 NavNextActivateId;                  // Set by ActivateItem(), queued until next frame.
     ImGuiActivateFlags      NavNextActivateFlags;
     ImGuiInputSource        NavInputSource;                     // Keyboard or Gamepad mode? THIS WILL ONLY BE None or NavGamepad or NavKeyboard.
@@ -1713,7 +1715,7 @@ struct ImGuiContext
     bool                    NavMoveForwardToNextFrame;
     ImGuiNavMoveFlags       NavMoveFlags;
     ImGuiScrollFlags        NavMoveScrollFlags;
-    ImGuiModFlags           NavMoveKeyMods;
+    ImGuiKeyChord           NavMoveKeyMods;
     ImGuiDir                NavMoveDir;                         // Direction of the move request (left/right/up/down)
     ImGuiDir                NavMoveDirForDebug;
     ImGuiDir                NavMoveClipDir;                     // FIXME-NAV: Describe the purpose of this better. Might want to rename?
@@ -1917,7 +1919,7 @@ struct ImGuiContext
         NavId = NavFocusScopeId = NavActivateId = NavActivateDownId = NavActivatePressedId = NavActivateInputId = 0;
         NavJustMovedToId = NavJustMovedToFocusScopeId = NavNextActivateId = 0;
         NavActivateFlags = NavNextActivateFlags = ImGuiActivateFlags_None;
-        NavJustMovedToKeyMods = ImGuiModFlags_None;
+        NavJustMovedToKeyMods = ImGuiMod_None;
         NavInputSource = ImGuiInputSource_None;
         NavLayer = ImGuiNavLayer_Main;
         NavIdIsAlive = false;
@@ -1933,7 +1935,7 @@ struct ImGuiContext
         NavMoveForwardToNextFrame = false;
         NavMoveFlags = ImGuiNavMoveFlags_None;
         NavMoveScrollFlags = ImGuiScrollFlags_None;
-        NavMoveKeyMods = ImGuiModFlags_None;
+        NavMoveKeyMods = ImGuiMod_None;
         NavMoveDir = NavMoveDirForDebug = NavMoveClipDir = ImGuiDir_None;
         NavScoringDebugCount = 0;
         NavTabbingDir = 0;
@@ -2708,11 +2710,21 @@ namespace ImGui
     // Inputs
     // FIXME: Eventually we should aim to move e.g. IsActiveIdUsingKey() into IsKeyXXX functions.
     inline bool             IsNamedKey(ImGuiKey key)                                    { return key >= ImGuiKey_NamedKey_BEGIN && key < ImGuiKey_NamedKey_END; }
+    inline bool             IsNamedKeyOrModKey(ImGuiKey key)                            { return (key >= ImGuiKey_NamedKey_BEGIN && key < ImGuiKey_NamedKey_END) || key == ImGuiMod_Ctrl || key == ImGuiMod_Shift || key == ImGuiMod_Alt || key == ImGuiMod_Super; }
     inline bool             IsLegacyKey(ImGuiKey key)                                   { return key >= ImGuiKey_LegacyNativeKey_BEGIN && key < ImGuiKey_LegacyNativeKey_END; }
     inline bool             IsGamepadKey(ImGuiKey key)                                  { return key >= ImGuiKey_Gamepad_BEGIN && key < ImGuiKey_Gamepad_END; }
     inline bool             IsAliasKey(ImGuiKey key)                                    { return key >= ImGuiKey_Aliases_BEGIN && key < ImGuiKey_Aliases_END; }
+    inline ImGuiKey         ConvertSingleModFlagToKey(ImGuiKey key)
+    {
+        if (key == ImGuiMod_Ctrl) return ImGuiKey_ReservedForModCtrl;
+        if (key == ImGuiMod_Shift) return ImGuiKey_ReservedForModShift;
+        if (key == ImGuiMod_Alt) return ImGuiKey_ReservedForModAlt;
+        if (key == ImGuiMod_Super) return ImGuiKey_ReservedForModSuper;
+        return key;
+    }
+
     IMGUI_API ImGuiKeyData* GetKeyData(ImGuiKey key);
-    IMGUI_API void          GetKeyChordName(ImGuiModFlags mods, ImGuiKey key, char* out_buf, int out_buf_size);
+    IMGUI_API void          GetKeyChordName(ImGuiKeyChord key_chord, char* out_buf, int out_buf_size);
     IMGUI_API void          SetItemUsingMouseWheel();
     IMGUI_API void          SetActiveIdUsingAllKeyboardKeys();
     inline bool             IsActiveIdUsingNavDir(ImGuiDir dir)                         { ImGuiContext& g = *GImGui; return (g.ActiveIdUsingNavDirMask & (1 << dir)) != 0; }

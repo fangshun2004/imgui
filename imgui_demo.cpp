@@ -75,6 +75,9 @@ Index of this file:
 
 */
 
+
+*/
+
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -192,6 +195,19 @@ static void ShowExampleMenuFile();
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
+static void ShowDemoWindowWidgets();
+static void ShowDemoWindowLayout();
+static void ShowDemoWindowPopups();
+static void ShowDemoWindowTables();
+static void ShowDemoWindowColumns();
+static void ShowDemoWindowInputs();
+
+//-----------------------------------------------------------------------------
+// [SECTION] Helpers
+//-----------------------------------------------------------------------------
+
+// Helper to display a little (?) mark which shows a tooltip when hovered.
+// In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
 static void HelpMarker(const char* desc)
 {
     ImGui::TextDisabled("(?)");
@@ -214,6 +230,7 @@ void*                           GImGuiDemoMarkerCallbackUserData = NULL;
 #define IMGUI_DEMO_MARKER(section)  do { if (GImGuiDemoMarkerCallback != NULL) GImGuiDemoMarkerCallback(__FILE__, __LINE__, section, GImGuiDemoMarkerCallbackUserData); } while (0)
 
 // Helper to display basic user controls.
+<<<<<<< .mine
 void ImGui::ShowUserGuide()
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -243,6 +260,37 @@ void ImGui::ShowUserGuide()
     ImGui::BulletText("Alt 用于跳转到窗口菜单图层.");
     ImGui::Unindent();
 }
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 
 //-----------------------------------------------------------------------------
 // [SECTION] Demo Window / ShowDemoWindow()
@@ -257,16 +305,6 @@ void ImGui::ShowUserGuide()
 
 // We split the contents of the big ShowDemoWindow() function into smaller functions
 // (because the link time of very large functions grow non-linearly)
-static void ShowDemoWindowWidgets();
-static void ShowDemoWindowLayout();
-static void ShowDemoWindowPopups();
-static void ShowDemoWindowTables();
-static void ShowDemoWindowColumns();
-static void ShowDemoWindowInputs();
-
-// Demonstrate most Dear ImGui features (this is big function!)
-// You may execute this function to experiment with the UI and understand what it does.
-// You may then search for keywords in the code when you are interested by a specific feature.
 void ImGui::ShowDemoWindow(bool* p_open)
 {
     // Exceptionally add an extra assert here for people confused about initial Dear ImGui setup
@@ -276,7 +314,6 @@ void ImGui::ShowDemoWindow(bool* p_open)
     // Examples Apps (accessible from the "Examples" menu)
     static bool show_app_main_menu_bar = false;
     static bool show_app_documents = false;
-
     static bool show_app_console = false;
     static bool show_app_log = false;
     static bool show_app_layout = false;
@@ -291,7 +328,6 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
     if (show_app_main_menu_bar)       ShowExampleAppMainMenuBar();
     if (show_app_documents)           ShowExampleAppDocuments(&show_app_documents);
-
     if (show_app_console)             ShowExampleAppConsole(&show_app_console);
     if (show_app_log)                 ShowExampleAppLog(&show_app_log);
     if (show_app_layout)              ShowExampleAppLayout(&show_app_layout);
@@ -370,8 +406,6 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
     // e.g. Use 2/3 of the space for widgets and 1/3 for labels (right align)
     //ImGui::PushItemWidth(-ImGui::GetWindowWidth() * 0.35f);
-
-    // e.g. Leave a fixed amount of width for labels (by passing a negative value), the rest goes to widgets.
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
     // Menu Bar
@@ -6427,8 +6461,42 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
 // [SECTION] Example App: Main Menu Bar / ShowExampleAppMainMenuBar()
 //-----------------------------------------------------------------------------
 // - ShowExampleAppMainMenuBar()
+void ImGui::ShowUserGuide()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::BulletText("Double-click on title bar to collapse window.");
+    ImGui::BulletText(
+        "Click and drag on lower corner to resize window\n"
+        "(double-click to auto fit window to its contents).");
+    ImGui::BulletText("CTRL+Click on a slider or drag box to input value as text.");
+    ImGui::BulletText("TAB/SHIFT+TAB to cycle through keyboard editable fields.");
+    ImGui::BulletText("CTRL+Tab to select a window.");
+    if (io.FontAllowUserScaling)
+        ImGui::BulletText("CTRL+Mouse Wheel to zoom window contents.");
+    ImGui::BulletText("While inputing text:\n");
+    ImGui::Indent();
+    ImGui::BulletText("CTRL+Left/Right to word jump.");
+    ImGui::BulletText("CTRL+A or double-click to select all.");
+    ImGui::BulletText("CTRL+X/C/V to use clipboard cut/copy/paste.");
+    ImGui::BulletText("CTRL+Z,CTRL+Y to undo/redo.");
+    ImGui::BulletText("ESCAPE to revert.");
+    ImGui::Unindent();
+    ImGui::BulletText("With keyboard navigation enabled:");
+    ImGui::Indent();
+    ImGui::BulletText("Arrow keys to navigate.");
+    ImGui::BulletText("Space to activate a widget.");
+    ImGui::BulletText("Return to input text into a widget.");
+    ImGui::BulletText("Escape to deactivate a widget, close popup, exit child window.");
+    ImGui::BulletText("Alt to jump to the menu layer of a window.");
+    ImGui::Unindent();
+}
 // - ShowExampleMenuFile()
 //-----------------------------------------------------------------------------
+
+// Demonstrate creating a "main" fullscreen menu bar and populating it.
+// Note the difference between BeginMainMenuBar() and BeginMenuBar():
+// - BeginMenuBar() = menu-bar inside current window (which needs the ImGuiWindowFlags_MenuBar flag!)
+// - BeginMainMenuBar() = helper to create menu-bar-sized window at the top of the main viewport + call BeginMenuBar() into it.
 
 // Demonstrate creating a "main" fullscreen menu bar and populating it.
 // Note the difference between BeginMainMenuBar() and BeginMenuBar():
@@ -6657,7 +6725,8 @@ struct ExampleAppConsole
 
         // Reserve enough left-over height for 1 separator + 1 input text
         const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-        ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar);
+        if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar))
+        {
         if (ImGui::BeginPopupContextWindow())
         {
             if (ImGui::Selectable("Clear")) ClearLog();
@@ -6717,6 +6786,7 @@ struct ExampleAppConsole
         ScrollToBottom = false;
 
         ImGui::PopStyleVar();
+        }
         ImGui::EndChild();
         ImGui::Separator();
 
@@ -6964,8 +7034,9 @@ struct ExampleAppLog
         Filter.Draw("Filter", -100.0f);
 
         ImGui::Separator();
-        ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar);
 
+        if (ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar))
+        {
         if (clear)
             Clear();
         if (copy)
@@ -7020,7 +7091,7 @@ struct ExampleAppLog
 
         if (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
             ImGui::SetScrollHereY(1.0f);
-
+        }
         ImGui::EndChild();
         ImGui::End();
     }
