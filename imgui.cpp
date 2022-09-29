@@ -1320,10 +1320,10 @@ static ImGuiInputEvent* FindLatestInputEvent(ImGuiInputEventType type, int arg =
     }
     return NULL;
 }
+
 // Queue a new key down/up event.
 // - ImGuiKey key:       Translated key (as in, generally ImGuiKey_A matches the key end-user would use to emit an 'A' character)
 // - bool down:          Is the key down? use false to signify a key release.
-// - float analog_value: 0.0f..1.0f
 // - float analog_value: 0.0f..1.0f
 void ImGuiIO::AddKeyAnalogEvent(ImGuiKey key, bool down, float analog_value)
 {
@@ -1346,13 +1346,13 @@ void ImGuiIO::AddKeyAnalogEvent(ImGuiKey key, bool down, float analog_value)
     if (ImGui::IsGamepadKey(key))
         BackendUsingLegacyNavInputArray = false;
 
-    // Partial filter of duplicates (not strictly needed, but makes data neater in particular for key mods and gamepad values which are most commonly spmamed)
+    // Filter duplicate (in particular: key mods and gamepad analog values are commonly spammed)
     const ImGuiInputEvent* latest_event = FindLatestInputEvent(ImGuiInputEventType_Key, (int)key);
     const ImGuiKeyData* key_data = ImGui::GetKeyData(key);
     const bool latest_key_down = latest_event ? latest_event->Key.Down : key_data->Down;
     const float latest_key_analog = latest_event ? latest_event->Key.AnalogValue : key_data->AnalogValue;
     if (latest_key_down == down && latest_key_analog == analog_value)
-            return;
+        return;
 
     // Add event
     ImGuiInputEvent e;
@@ -3622,11 +3622,11 @@ bool ImGui::IsItemHovered(ImGuiHoveredFlags flags)
             return false;
         IM_ASSERT((flags & (ImGuiHoveredFlags_AnyWindow | ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_NoPopupHierarchy)) == 0);   // Flags not supported by this function
 
+        // Done with rectangle culling so we can perform heavier checks now
         // Test if we are hovering the right window (our window could be behind another window)
         // [2021/03/02] Reworked / reverted the revert, finally. Note we want e.g. BeginGroup/ItemAdd/EndGroup to work as well. (#3851)
         // [2017/10/16] Reverted commit 344d48be3 and testing RootWindow instead. I believe it is correct to NOT test for RootWindow but this leaves us unable
         // to use IsItemHovered() after EndChild() itself. Until a solution is found I believe reverting to the test from 2017/09/27 is safe since this was
-        // the test that has been running for a long while.
         // the test that has been running for a long while.
         if (g.HoveredWindow != window && (status_flags & ImGuiItemStatusFlags_HoveredWindow) == 0)
             if ((flags & ImGuiHoveredFlags_AllowWhenOverlapped) == 0)
@@ -8161,30 +8161,30 @@ void ImGui::UpdateInputEvents(bool trickle_fast_inputs)
         {
             // Trickling Rule: Stop processing queued events if we already handled a mouse button change
             ImVec2 event_pos(e->MousePos.PosX, e->MousePos.PosY);
-                if (trickle_fast_inputs && (mouse_button_changed != 0 || mouse_wheeled || key_changed || text_inputted))
-                    break;
-                io.MousePos = event_pos;
-                mouse_moved = true;
-            }
+            if (trickle_fast_inputs && (mouse_button_changed != 0 || mouse_wheeled || key_changed || text_inputted))
+                break;
+            io.MousePos = event_pos;
+            mouse_moved = true;
+        }
         else if (e->Type == ImGuiInputEventType_MouseButton)
         {
             // Trickling Rule: Stop processing queued events if we got multiple action on the same button
             const ImGuiMouseButton button = e->MouseButton.Button;
             IM_ASSERT(button >= 0 && button < ImGuiMouseButton_COUNT);
-                if (trickle_fast_inputs && ((mouse_button_changed & (1 << button)) || mouse_wheeled))
-                    break;
-                io.MouseDown[button] = e->MouseButton.Down;
-                mouse_button_changed |= (1 << button);
-            }
+            if (trickle_fast_inputs && ((mouse_button_changed & (1 << button)) || mouse_wheeled))
+                break;
+            io.MouseDown[button] = e->MouseButton.Down;
+            mouse_button_changed |= (1 << button);
+        }
         else if (e->Type == ImGuiInputEventType_MouseWheel)
         {
-                // Trickling Rule: Stop processing queued events if we got multiple action on the event
-                if (trickle_fast_inputs && (mouse_moved || mouse_button_changed != 0))
-                    break;
-                io.MouseWheelH += e->MouseWheel.WheelX;
-                io.MouseWheel += e->MouseWheel.WheelY;
-                mouse_wheeled = true;
-            }
+            // Trickling Rule: Stop processing queued events if we got multiple action on the event
+            if (trickle_fast_inputs && (mouse_moved || mouse_button_changed != 0))
+                break;
+            io.MouseWheelH += e->MouseWheel.WheelX;
+            io.MouseWheel += e->MouseWheel.WheelY;
+            mouse_wheeled = true;
+        }
         else if (e->Type == ImGuiInputEventType_Key)
         {
             // Trickling Rule: Stop processing queued events if we got multiple action on the same button
@@ -8192,35 +8192,29 @@ void ImGui::UpdateInputEvents(bool trickle_fast_inputs)
             IM_ASSERT(key != ImGuiKey_None);
             ImGuiKeyData* key_data = GetKeyData(key);
             const int key_data_index = (int)(key_data - g.IO.KeysData);
-            ImGuiKeyData* key_data = GetKeyData(key);
-            const int key_data_index = (int)(key_data - g.IO.KeysData);
-            e->IgnoredAsSame = (key_data->Down == e->Key.Down && key_data->AnalogValue == e->Key.AnalogValue);
-            if (!e->IgnoredAsSame)
-            {
-                // Trickling Rule: Stop processing queued events if we got multiple action on the same button
-                if (trickle_fast_inputs && key_data->Down != e->Key.Down && (key_changed_mask.TestBit(key_data_index) || text_inputted || mouse_button_changed != 0))
-                    break;
-                key_data->Down = e->Key.Down;
-                key_data->AnalogValue = e->Key.AnalogValue;
-                key_changed = true;
-                key_changed_mask.SetBit(key_data_index);
+            if (trickle_fast_inputs && key_data->Down != e->Key.Down && (key_changed_mask.TestBit(key_data_index) || text_inputted || mouse_button_changed != 0))
+                break;
+            key_data->Down = e->Key.Down;
+            key_data->AnalogValue = e->Key.AnalogValue;
+            key_changed = true;
+            key_changed_mask.SetBit(key_data_index);
 
             if (key == ImGuiMod_Ctrl || key == ImGuiMod_Shift || key == ImGuiMod_Alt || key == ImGuiMod_Super)
-                {
+            {
                 if (key == ImGuiMod_Ctrl) { io.KeyCtrl = key_data->Down; }
                 if (key == ImGuiMod_Shift) { io.KeyShift = key_data->Down; }
                 if (key == ImGuiMod_Alt) { io.KeyAlt = key_data->Down; }
                 if (key == ImGuiMod_Super) { io.KeySuper = key_data->Down; }
                 io.KeyMods = GetMergedModsFromBools();
-                }
+            }
 
-                // Allow legacy code using io.KeysDown[GetKeyIndex()] with new backends
+            // Allow legacy code using io.KeysDown[GetKeyIndex()] with new backends
 #ifndef IMGUI_DISABLE_OBSOLETE_KEYIO
             io.KeysDown[key_data_index] = key_data->Down;
             if (io.KeyMap[key_data_index] != -1)
                 io.KeysDown[io.KeyMap[key_data_index]] = key_data->Down;
 #endif
-            }
+        }
         else if (e->Type == ImGuiInputEventType_Text)
         {
             // Trickling Rule: Stop processing queued events if keys/mouse have been interacted with
@@ -8233,10 +8227,10 @@ void ImGui::UpdateInputEvents(bool trickle_fast_inputs)
         }
         else if (e->Type == ImGuiInputEventType_Focus)
         {
-            // We intentionally overwrite this and process lower, in order to give a chance
+            // We intentionally overwrite this and process in NewFrame(), in order to give a chance
             // to multi-viewports backends to queue AddFocusEvent(false) + AddFocusEvent(true) in same frame.
             const bool focus_lost = !e->AppFocused.Focused;
-                io.AppFocusLost = focus_lost;
+            io.AppFocusLost = focus_lost;
         }
         else
         {
