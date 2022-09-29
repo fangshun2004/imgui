@@ -230,55 +230,21 @@ void*                           GImGuiDemoMarkerCallbackUserData = NULL;
 #define IMGUI_DEMO_MARKER(section)  do { if (GImGuiDemoMarkerCallback != NULL) GImGuiDemoMarkerCallback(__FILE__, __LINE__, section, GImGuiDemoMarkerCallbackUserData); } while (0)
 
 // Helper to display basic user controls.
-<<<<<<< .mine
-void ImGui::ShowUserGuide()
-{
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::BulletText("双击标题栏以折叠窗口。.");
-    ImGui::BulletText(
-        "单击并拖动下角以调整窗口大小\n"
-        "(双击以自动使窗口适应其内容).");
-    ImGui::BulletText("按住 Ctrl 键并单击滑块或拖动框以文本形式输入值.");
-    ImGui::BulletText("TAB/SHIFT+TAB 在键盘可编辑的字段中循环切换.");
-	ImGui::BulletText("CTRL+Tab 以选择窗口.");
-	if (io.FontAllowUserScaling)
-        ImGui::BulletText("CTRL+Mouse 滚轮缩放窗口内容.");
-    ImGui::BulletText("输入文本时:\n");
-    ImGui::Indent();
-    ImGui::BulletText("CTRL+左/右跳转.");
-    ImGui::BulletText("CTRL+A 或双击以全选.");
-    ImGui::BulletText("CTRL+X/C/V 以使用剪贴板剪切/复制/粘贴.");
-    ImGui::BulletText("CTRL+Z，CTRL+Y 以撤消/重做.");
-    ImGui::BulletText("ESCAPE 以恢复.");
-    ImGui::Unindent();
-    ImGui::BulletText("启用键盘导航:");
-    ImGui::Indent();
-    ImGui::BulletText("用于导航的箭头键.");
-    ImGui::BulletText("用于激活小部件的空间.");
-    ImGui::BulletText("返回到微件中的输入文本.");
-    ImGui::BulletText("Escape 以停用小部件，关闭弹出窗口，退出子窗口.");
-    ImGui::BulletText("Alt 用于跳转到窗口菜单图层.");
-    ImGui::Unindent();
-}
-=======
+// [SECTION] Demo Window / ShowDemoWindow()
+// [SECTION] Demo Window / ShowDemoWindow()
+//-----------------------------------------------------------------------------
+// - ShowDemoWindow()
+// - ShowDemoWindowWidgets()
+// - ShowDemoWindowLayout()
+// - ShowDemoWindowPopups()
+// - ShowDemoWindowTables()
+// - ShowDemoWindowColumns()
+// - ShowDemoWindowInputs()
+//-----------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Demonstrate most Dear ImGui features (this is big function!)
+// You may execute this function to experiment with the UI and understand what it does.
+// You may then search for keywords in the code when you are interested by a specific feature.
 
 
 
