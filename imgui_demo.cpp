@@ -50,8 +50,10 @@
 
 Index of this file:
 
-// [SECTION] Forward Declarations, Helpers
+// [SECTION] Forward Declarations
+// [SECTION] Helpers
 // [SECTION] Demo Window / ShowDemoWindow()
+// - ShowDemoWindow()
 // - sub section: ShowDemoWindowWidgets()
 // - sub section: ShowDemoWindowLayout()
 // - sub section: ShowDemoWindowPopups()
@@ -59,6 +61,7 @@ Index of this file:
 // - sub section: ShowDemoWindowInputs()
 // [SECTION] About Window / ShowAboutWindow()
 // [SECTION] Style Editor / ShowStyleEditor()
+// [SECTION] User Guide / ShowUserGuide()
 // [SECTION] Example App: Main Menu Bar / ShowExampleAppMainMenuBar()
 // [SECTION] Example App: Debug Console / ShowExampleAppConsole()
 // [SECTION] Example App: Debug Log / ShowExampleAppLog()
@@ -72,9 +75,6 @@ Index of this file:
 // [SECTION] Example App: Manipulating window titles / ShowExampleAppWindowTitles()
 // [SECTION] Example App: Custom Rendering using ImDrawList API / ShowExampleAppCustomRendering()
 // [SECTION] Example App: Documents Handling / ShowExampleAppDocuments()
-
-*/
-
 
 */
 
@@ -193,8 +193,8 @@ static void ShowExampleAppWindowTitles(bool* p_open);
 static void ShowExampleAppCustomRendering(bool* p_open);
 static void ShowExampleMenuFile();
 
-// Helper to display a little (?) mark which shows a tooltip when hovered.
-// In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
+// We split the contents of the big ShowDemoWindow() function into smaller functions
+// (because the link time of very large functions grow non-linearly)
 static void ShowDemoWindowWidgets();
 static void ShowDemoWindowLayout();
 static void ShowDemoWindowPopups();
@@ -223,14 +223,13 @@ static void HelpMarker(const char* desc)
 
 // Helper to wire demo markers located in code to an interactive browser
 typedef void (*ImGuiDemoMarkerCallback)(const char* file, int line, const char* section, void* user_data);
-extern ImGuiDemoMarkerCallback  GImGuiDemoMarkerCallback;
-extern void*                    GImGuiDemoMarkerCallbackUserData;
-ImGuiDemoMarkerCallback         GImGuiDemoMarkerCallback = NULL;
-void*                           GImGuiDemoMarkerCallbackUserData = NULL;
+extern ImGuiDemoMarkerCallback      GImGuiDemoMarkerCallback;
+extern void*                        GImGuiDemoMarkerCallbackUserData;
+ImGuiDemoMarkerCallback             GImGuiDemoMarkerCallback = NULL;
+void*                               GImGuiDemoMarkerCallbackUserData = NULL;
 #define IMGUI_DEMO_MARKER(section)  do { if (GImGuiDemoMarkerCallback != NULL) GImGuiDemoMarkerCallback(__FILE__, __LINE__, section, GImGuiDemoMarkerCallbackUserData); } while (0)
 
-// Helper to display basic user controls.
-// [SECTION] Demo Window / ShowDemoWindow()
+//-----------------------------------------------------------------------------
 // [SECTION] Demo Window / ShowDemoWindow()
 //-----------------------------------------------------------------------------
 // - ShowDemoWindow()
@@ -245,37 +244,11 @@ void*                           GImGuiDemoMarkerCallbackUserData = NULL;
 // Demonstrate most Dear ImGui features (this is big function!)
 // You may execute this function to experiment with the UI and understand what it does.
 // You may then search for keywords in the code when you are interested by a specific feature.
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
-
-//-----------------------------------------------------------------------------
-// [SECTION] Demo Window / ShowDemoWindow()
-//-----------------------------------------------------------------------------
-// - ShowDemoWindowWidgets()
-// - ShowDemoWindowLayout()
-// - ShowDemoWindowPopups()
-// - ShowDemoWindowTables()
-// - ShowDemoWindowColumns()
-// - ShowDemoWindowInputs()
-//-----------------------------------------------------------------------------
-
-// We split the contents of the big ShowDemoWindow() function into smaller functions
-// (because the link time of very large functions grow non-linearly)
 void ImGui::ShowDemoWindow(bool* p_open)
 {
     // Exceptionally add an extra assert here for people confused about initial Dear ImGui setup
-    // Most ImGui functions would normally just crash if the context is missing.
-    IM_ASSERT(ImGui::GetCurrentContext() != NULL && "缺少亲爱的imgui上下文。参考示例应用!");
+    // Most functions would normally just crash if the context is missing.
+    IM_ASSERT(ImGui::GetCurrentContext() != NULL && "Missing dear imgui context. Refer to examples app!");
 
     // Examples Apps (accessible from the "Examples" menu)
     static bool show_app_main_menu_bar = false;
@@ -306,7 +279,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
     if (show_app_window_titles)       ShowExampleAppWindowTitles(&show_app_window_titles);
     if (show_app_custom_rendering)    ShowExampleAppCustomRendering(&show_app_custom_rendering);
 
-    // Dear ImGui Apps (accessible from the "Tools" menu)
+    // Dear ImGui Tools/Apps (accessible from the "Tools" menu)
     static bool show_app_metrics = false;
     static bool show_app_debug_log = false;
     static bool show_app_stack_tool = false;
@@ -323,7 +296,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
         ImGui::ShowAboutWindow(&show_app_about);
     if (show_app_style_editor)
     {
-        ImGui::Begin("亲爱的ImGui风格编辑器", &show_app_style_editor);
+        ImGui::Begin("Dear ImGui Style Editor", &show_app_style_editor);
         ImGui::ShowStyleEditor();
         ImGui::End();
     }
@@ -369,9 +342,9 @@ void ImGui::ShowDemoWindow(bool* p_open)
     }
 
     // Most "big" widgets share a common width settings by default. See 'Demo->Layout->Widgets Width' for details.
-
     // e.g. Use 2/3 of the space for widgets and 1/3 for labels (right align)
     //ImGui::PushItemWidth(-ImGui::GetWindowWidth() * 0.35f);
+    // e.g. Leave a fixed amount of width for labels (by passing a negative value), the rest goes to widgets.
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
     // Menu Bar
@@ -6424,9 +6397,9 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
 }
 
 //-----------------------------------------------------------------------------
-// [SECTION] Example App: Main Menu Bar / ShowExampleAppMainMenuBar()
+// [SECTION] User Guide / ShowUserGuide()
 //-----------------------------------------------------------------------------
-// - ShowExampleAppMainMenuBar()
+
 void ImGui::ShowUserGuide()
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -6456,13 +6429,13 @@ void ImGui::ShowUserGuide()
     ImGui::BulletText("Alt to jump to the menu layer of a window.");
     ImGui::Unindent();
 }
+
+//-----------------------------------------------------------------------------
+// [SECTION] Example App: Main Menu Bar / ShowExampleAppMainMenuBar()
+//-----------------------------------------------------------------------------
+// - ShowExampleAppMainMenuBar()
 // - ShowExampleMenuFile()
 //-----------------------------------------------------------------------------
-
-// Demonstrate creating a "main" fullscreen menu bar and populating it.
-// Note the difference between BeginMainMenuBar() and BeginMenuBar():
-// - BeginMenuBar() = menu-bar inside current window (which needs the ImGuiWindowFlags_MenuBar flag!)
-// - BeginMainMenuBar() = helper to create menu-bar-sized window at the top of the main viewport + call BeginMenuBar() into it.
 
 // Demonstrate creating a "main" fullscreen menu bar and populating it.
 // Note the difference between BeginMainMenuBar() and BeginMenuBar():
@@ -6693,65 +6666,65 @@ struct ExampleAppConsole
         const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
         if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar))
         {
-        if (ImGui::BeginPopupContextWindow())
-        {
-            if (ImGui::Selectable("Clear")) ClearLog();
-            ImGui::EndPopup();
-        }
+            if (ImGui::BeginPopupContextWindow())
+            {
+                if (ImGui::Selectable("Clear")) ClearLog();
+                ImGui::EndPopup();
+            }
 
-        // Display every line as a separate entry so we can change their color or add custom widgets.
-        // If you only want raw text you can use ImGui::TextUnformatted(log.begin(), log.end());
-        // NB- if you have thousands of entries this approach may be too inefficient and may require user-side clipping
-        // to only process visible items. The clipper will automatically measure the height of your first item and then
-        // "seek" to display only items in the visible area.
-        // To use the clipper we can replace your standard loop:
-        //      for (int i = 0; i < Items.Size; i++)
-        //   With:
-        //      ImGuiListClipper clipper;
-        //      clipper.Begin(Items.Size);
-        //      while (clipper.Step())
-        //         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
-        // - That your items are evenly spaced (same height)
-        // - That you have cheap random access to your elements (you can access them given their index,
-        //   without processing all the ones before)
-        // You cannot this code as-is if a filter is active because it breaks the 'cheap random-access' property.
-        // We would need random-access on the post-filtered list.
-        // A typical application wanting coarse clipping and filtering may want to pre-compute an array of indices
-        // or offsets of items that passed the filtering test, recomputing this array when user changes the filter,
-        // and appending newly elements as they are inserted. This is left as a task to the user until we can manage
-        // to improve this example code!
-        // If your items are of variable height:
-        // - Split them into same height items would be simpler and facilitate random-seeking into your list.
-        // - Consider using manual call to IsRectVisible() and skipping extraneous decoration from your items.
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-        if (copy_to_clipboard)
-            ImGui::LogToClipboard();
-        for (int i = 0; i < Items.Size; i++)
-        {
-            const char* item = Items[i];
-            if (!Filter.PassFilter(item))
-                continue;
+            // Display every line as a separate entry so we can change their color or add custom widgets.
+            // If you only want raw text you can use ImGui::TextUnformatted(log.begin(), log.end());
+            // NB- if you have thousands of entries this approach may be too inefficient and may require user-side clipping
+            // to only process visible items. The clipper will automatically measure the height of your first item and then
+            // "seek" to display only items in the visible area.
+            // To use the clipper we can replace your standard loop:
+            //      for (int i = 0; i < Items.Size; i++)
+            //   With:
+            //      ImGuiListClipper clipper;
+            //      clipper.Begin(Items.Size);
+            //      while (clipper.Step())
+            //         for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
+            // - That your items are evenly spaced (same height)
+            // - That you have cheap random access to your elements (you can access them given their index,
+            //   without processing all the ones before)
+            // You cannot this code as-is if a filter is active because it breaks the 'cheap random-access' property.
+            // We would need random-access on the post-filtered list.
+            // A typical application wanting coarse clipping and filtering may want to pre-compute an array of indices
+            // or offsets of items that passed the filtering test, recomputing this array when user changes the filter,
+            // and appending newly elements as they are inserted. This is left as a task to the user until we can manage
+            // to improve this example code!
+            // If your items are of variable height:
+            // - Split them into same height items would be simpler and facilitate random-seeking into your list.
+            // - Consider using manual call to IsRectVisible() and skipping extraneous decoration from your items.
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+            if (copy_to_clipboard)
+                ImGui::LogToClipboard();
+            for (int i = 0; i < Items.Size; i++)
+            {
+                const char* item = Items[i];
+                if (!Filter.PassFilter(item))
+                    continue;
 
-            // Normally you would store more information in your item than just a string.
-            // (e.g. make Items[] an array of structure, store color/type etc.)
-            ImVec4 color;
-            bool has_color = false;
-            if (strstr(item, "[error]"))          { color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); has_color = true; }
-            else if (strncmp(item, "# ", 2) == 0) { color = ImVec4(1.0f, 0.8f, 0.6f, 1.0f); has_color = true; }
-            if (has_color)
-                ImGui::PushStyleColor(ImGuiCol_Text, color);
-            ImGui::TextUnformatted(item);
-            if (has_color)
-                ImGui::PopStyleColor();
-        }
-        if (copy_to_clipboard)
-            ImGui::LogFinish();
+                // Normally you would store more information in your item than just a string.
+                // (e.g. make Items[] an array of structure, store color/type etc.)
+                ImVec4 color;
+                bool has_color = false;
+                if (strstr(item, "[error]")) { color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); has_color = true; }
+                else if (strncmp(item, "# ", 2) == 0) { color = ImVec4(1.0f, 0.8f, 0.6f, 1.0f); has_color = true; }
+                if (has_color)
+                    ImGui::PushStyleColor(ImGuiCol_Text, color);
+                ImGui::TextUnformatted(item);
+                if (has_color)
+                    ImGui::PopStyleColor();
+            }
+            if (copy_to_clipboard)
+                ImGui::LogFinish();
 
-        if (ScrollToBottom || (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))
-            ImGui::SetScrollHereY(1.0f);
-        ScrollToBottom = false;
+            if (ScrollToBottom || (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))
+                ImGui::SetScrollHereY(1.0f);
+            ScrollToBottom = false;
 
-        ImGui::PopStyleVar();
+            ImGui::PopStyleVar();
         }
         ImGui::EndChild();
         ImGui::Separator();
@@ -7003,60 +6976,60 @@ struct ExampleAppLog
 
         if (ImGui::BeginChild("scrolling", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar))
         {
-        if (clear)
-            Clear();
-        if (copy)
-            ImGui::LogToClipboard();
+            if (clear)
+                Clear();
+            if (copy)
+                ImGui::LogToClipboard();
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-        const char* buf = Buf.begin();
-        const char* buf_end = Buf.end();
-        if (Filter.IsActive())
-        {
-            // In this example we don't use the clipper when Filter is enabled.
-            // This is because we don't have random access to the result of our filter.
-            // A real application processing logs with ten of thousands of entries may want to store the result of
-            // search/filter.. especially if the filtering function is not trivial (e.g. reg-exp).
-            for (int line_no = 0; line_no < LineOffsets.Size; line_no++)
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+            const char* buf = Buf.begin();
+            const char* buf_end = Buf.end();
+            if (Filter.IsActive())
             {
-                const char* line_start = buf + LineOffsets[line_no];
-                const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-                if (Filter.PassFilter(line_start, line_end))
-                    ImGui::TextUnformatted(line_start, line_end);
-            }
-        }
-        else
-        {
-            // The simplest and easy way to display the entire buffer:
-            //   ImGui::TextUnformatted(buf_begin, buf_end);
-            // And it'll just work. TextUnformatted() has specialization for large blob of text and will fast-forward
-            // to skip non-visible lines. Here we instead demonstrate using the clipper to only process lines that are
-            // within the visible area.
-            // If you have tens of thousands of items and their processing cost is non-negligible, coarse clipping them
-            // on your side is recommended. Using ImGuiListClipper requires
-            // - A) random access into your data
-            // - B) items all being the  same height,
-            // both of which we can handle since we have an array pointing to the beginning of each line of text.
-            // When using the filter (in the block of code above) we don't have random access into the data to display
-            // anymore, which is why we don't use the clipper. Storing or skimming through the search result would make
-            // it possible (and would be recommended if you want to search through tens of thousands of entries).
-            ImGuiListClipper clipper;
-            clipper.Begin(LineOffsets.Size);
-            while (clipper.Step())
-            {
-                for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd; line_no++)
+                // In this example we don't use the clipper when Filter is enabled.
+                // This is because we don't have random access to the result of our filter.
+                // A real application processing logs with ten of thousands of entries may want to store the result of
+                // search/filter.. especially if the filtering function is not trivial (e.g. reg-exp).
+                for (int line_no = 0; line_no < LineOffsets.Size; line_no++)
                 {
                     const char* line_start = buf + LineOffsets[line_no];
                     const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
-                    ImGui::TextUnformatted(line_start, line_end);
+                    if (Filter.PassFilter(line_start, line_end))
+                        ImGui::TextUnformatted(line_start, line_end);
                 }
             }
-            clipper.End();
-        }
-        ImGui::PopStyleVar();
+            else
+            {
+                // The simplest and easy way to display the entire buffer:
+                //   ImGui::TextUnformatted(buf_begin, buf_end);
+                // And it'll just work. TextUnformatted() has specialization for large blob of text and will fast-forward
+                // to skip non-visible lines. Here we instead demonstrate using the clipper to only process lines that are
+                // within the visible area.
+                // If you have tens of thousands of items and their processing cost is non-negligible, coarse clipping them
+                // on your side is recommended. Using ImGuiListClipper requires
+                // - A) random access into your data
+                // - B) items all being the  same height,
+                // both of which we can handle since we have an array pointing to the beginning of each line of text.
+                // When using the filter (in the block of code above) we don't have random access into the data to display
+                // anymore, which is why we don't use the clipper. Storing or skimming through the search result would make
+                // it possible (and would be recommended if you want to search through tens of thousands of entries).
+                ImGuiListClipper clipper;
+                clipper.Begin(LineOffsets.Size);
+                while (clipper.Step())
+                {
+                    for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd; line_no++)
+                    {
+                        const char* line_start = buf + LineOffsets[line_no];
+                        const char* line_end = (line_no + 1 < LineOffsets.Size) ? (buf + LineOffsets[line_no + 1] - 1) : buf_end;
+                        ImGui::TextUnformatted(line_start, line_end);
+                    }
+                }
+                clipper.End();
+            }
+            ImGui::PopStyleVar();
 
-        if (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-            ImGui::SetScrollHereY(1.0f);
+            if (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+                ImGui::SetScrollHereY(1.0f);
         }
         ImGui::EndChild();
         ImGui::End();
