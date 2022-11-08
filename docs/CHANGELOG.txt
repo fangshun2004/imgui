@@ -107,6 +107,17 @@ Other Changes:
 - Popups & Modals: fixed nested Begin() being erroneously input-inhibited. While it is
   unusual, you can nest a Begin() inside a popup or modal, it is occasionally useful to
   achieve certains things (e.g. some ways to implement suggestion popup #718, #4461).
+- Inputs: Standard widgets now claim for key/button ownership and test for them.
+  - Fixes scenario where e.g. a Popup with a Selectable() reacting on mouse down
+    (e.g. double click) closes, and behind it is another window with an item reacting
+    on mouse up. Previously this would lead to both items reacting, now the item in the
+    window behind won't react on the mouse up since the mouse button ownership has already
+    been claimed earlier.
+  - Internals: There are MANY more aspects to this changes. Added experimental/internal APIs
+    to allow handling input/shorting routing and key ownership. Things will be moved into
+    public APIs over time. For now this release is a way to test the solidity of underlying
+    systems while letting early adopters adopters toy with internals.
+    (#456, #2637, #2620, #2891, #3370, #3724, #4828, #5108, #5242, #5641)
 - Scrolling: Tweak mouse-wheel locked window timer so it is shorter but also gets reset
   whenever scrolling again (#2604).
 - Scrolling: Mitigated issue where multi-axis mouse-wheel inputs (usually from touch pad
@@ -116,7 +127,7 @@ Other Changes:
 - InputText: numerical fields automatically accept full-width characters (U+FF01..U+FF5E)
   by converting them to half-width (U+0021..U+007E).
 - InputText: added ImGuiInputTextFlags_EscapeClearsAll flag: first press on Escape clears
-  text if any, second press deactivate the InputText(). (#5688)
+  text if any, second press deactivate the InputText(). (#5688, #2620)
 - InputText: added support for shift+click style selection. (#5619) [@procedural]
 - InputText: clarified that callbacks cannot modify buffer when using the ReadOnly flag.
 - InputText: fixed minor one-frame selection glitch when reverting with Escape.
@@ -138,6 +149,9 @@ Other Changes:
 - Tabs: Enforcing minimum size of 1.0f, fixed asserting on zero-tab widths. (#5572)
 - Window: Fixed a potential crash when appending to a child window. (#5515, #3496, #4797) [@rokups]
 - Window: Fixed an issue where uncollapsed a window would show a scrollbar for a frame.
+- Window: Auto-fit size takes account of work rectangle (menu bars eating from viewport). (#5843)
+- Window: Fixed position not being clamped while auto-resizing (fixes appearing windows without
+  .ini data from moving for a frame when using io.ConfigWindowsMoveFromTitleBarOnly). (#5843)
 - IO: Added ImGuiMod_Shortcut which is ImGuiMod_Super on Mac and ImGuiMod_Ctrl otherwise. (#456)
 - IO: Added ImGuiKey_MouseXXX aliases for mouse buttons/wheel so all operations done on ImGuiKey
   can apply to mouse data as well. (#4921)
@@ -172,7 +186,9 @@ Other Changes:
 - Misc: ImGuiKey is now a typed enum, allowing ImGuiKey_XXX symbols to be named in debuggers. (#4921)
 - Misc: better error reporting for PopStyleColor()/PopStyleVar() + easier to recover. (#1651)
 - Misc: io.Framerate moving average now converge in 60 frames instead of 120. (#5236, #4138)
-- Debug Tools: Debug Log: Added 'IO' and 'Clipper' events logging.
+- Debug Tools: Debug Log: Visually locate items when hovering a 0xXXXXXXXX value. (#5855)
+- Debug Tools: Debug Log: Added 'IO' and 'Clipper' events logging. (#5855)
+- Debug Tools: Metrics: Visually locate items when hovering a 0xXXXXXXXX value (in most places).
 - Debug Tools: Item Picker: Mouse button can be changed by holding Ctrl+Shift, making it easier
   to use the Item Picker in e.g. menus. (#2673)
 - Docs: Fixed various typos in comments and documentations. (#5649, #5675, #5679) [@tocic, @lessigsx]
@@ -193,6 +209,7 @@ Other Changes:
 - Backends: Metal: Update deprecated property 'sampleCount'->'rasterSampleCount'. (#5603) [@dcvz]
 - Backends: Vulkan: Added experimental ImGui_ImplVulkan_RemoveTexture() for api symetry. (#914, #5738).
 - Backends: OSX: Fixed mouse inputs on flipped views. (#5756) [@Nemirtingas]
+- Backends: OSX: Fixed mouse coordinate before clicking on the host window. (#5842) [@maezawa-akira]
 - Backends: OSX: Fixes to support full app creation in C++. (#5403) [@stack]
 
 
