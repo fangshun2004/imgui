@@ -1,4 +1,4 @@
-// dear imgui, v1.89.5
+// dear imgui, v1.89.7 WIP
 // (tables and columns code)
 
 /*
@@ -183,6 +183,7 @@ Index of this file:
 //-----------------------------------------------------------------------------
 // [SECTION] Header mess
 //-----------------------------------------------------------------------------
+
 
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
@@ -663,7 +664,6 @@ void ImGui::TableBeginApplyRequests(ImGuiTable* table)
             IM_ASSERT(dst_column->DisplayOrder == dst_order - reorder_dir);
 
             // Display order is stored in both columns->IndexDisplayOrder and table->DisplayOrder[],
-            // rebuild the later from the former.
             for (int column_n = 0; column_n < table->ColumnsCount; column_n++)
                 table->DisplayOrderToIndex[table->Columns[column_n].DisplayOrder] = (ImGuiTableColumnIdx)column_n;
             table->ReorderColumnDir = 0;
@@ -1145,7 +1145,7 @@ void ImGui::TableUpdateLayout(ImGuiTable* table)
         EndPopup();
     }
 
-    // [Part 13] Sanitize and build sort specs before we have a change to use them for display.
+    // [Part 12] Sanitize and build sort specs before we have a chance to use them for display.
     // This path will only be exercised when sort specs are modified before header rows (e.g. init or visibility change)
     if (table->IsSortSpecsDirty && (table->Flags & ImGuiTableFlags_Sortable))
         TableSortSpecsBuild(table);
@@ -1980,6 +1980,7 @@ bool ImGui::TableNextColumn()
 // FIXME-TABLE FIXME-OPT: Could probably shortcut some things for non-active or clipped columns.
 void ImGui::TableBeginCell(ImGuiTable* table, int column_n)
 {
+    ImGuiContext& g = *GImGui;
     ImGuiTableColumn* column = &table->Columns[column_n];
     ImGuiWindow* window = table->InnerWindow;
     table->CurrentColumn = column_n;
@@ -2004,7 +2005,6 @@ void ImGui::TableBeginCell(ImGuiTable* table, int column_n)
     window->SkipItems = column->IsSkipItems;
     if (column->IsSkipItems)
     {
-        ImGuiContext& g = *GImGui;
         g.LastItemData.ID = 0;
         g.LastItemData.StatusFlags = 0;
     }
@@ -2023,7 +2023,6 @@ void ImGui::TableBeginCell(ImGuiTable* table, int column_n)
     }
 
     // Logging
-    ImGuiContext& g = *GImGui;
     if (g.LogEnabled && !column->IsSkipItems)
     {
         LogRenderedText(&window->DC.CursorPos, "|");
@@ -2501,11 +2500,9 @@ void ImGui::TableMergeDrawChannels(ImGuiTable* table)
                     merge_clip_rect.Max.x = ImMax(merge_clip_rect.Max.x, host_rect.Max.x);
                 if ((merge_group_n & 2) != 0 && (table->Flags & ImGuiTableFlags_NoHostExtendY) == 0)
                     merge_clip_rect.Max.y = ImMax(merge_clip_rect.Max.y, host_rect.Max.y);
-#if 0
-                GetOverlayDrawList()->AddRect(merge_group->ClipRect.Min, merge_group->ClipRect.Max, IM_COL32(255, 0, 0, 200), 0.0f, 0, 1.0f);
-                GetOverlayDrawList()->AddLine(merge_group->ClipRect.Min, merge_clip_rect.Min, IM_COL32(255, 100, 0, 200));
-                GetOverlayDrawList()->AddLine(merge_group->ClipRect.Max, merge_clip_rect.Max, IM_COL32(255, 100, 0, 200));
-#endif
+                //GetForegroundDrawList()->AddRect(merge_group->ClipRect.Min, merge_group->ClipRect.Max, IM_COL32(255, 0, 0, 200), 0.0f, 0, 1.0f); // [DEBUG]
+                //GetForegroundDrawList()->AddLine(merge_group->ClipRect.Min, merge_clip_rect.Min, IM_COL32(255, 100, 0, 200));
+                //GetForegroundDrawList()->AddLine(merge_group->ClipRect.Max, merge_clip_rect.Max, IM_COL32(255, 100, 0, 200));
                 remaining_count -= merge_group->ChannelsCount;
                 for (int n = 0; n < (size_for_masks_bitarrays_one >> 2); n++)
                     remaining_mask[n] &= ~merge_group->ChannelsMask[n];
@@ -2669,7 +2666,6 @@ ImGuiTableSortSpecs* ImGui::TableGetSortSpecs()
         TableUpdateLayout(table);
 
     TableSortSpecsBuild(table);
-
     return &table->SortSpecs;
 }
 
@@ -3040,8 +3036,8 @@ void ImGui::TableHeader(const char* label)
     RenderTextEllipsis(window->DrawList, label_pos, ImVec2(ellipsis_max, label_pos.y + label_height + g.Style.FramePadding.y), ellipsis_max, ellipsis_max, label, label_end, &label_size);
 
     const bool text_clipped = label_size.x > (ellipsis_max - label_pos.x);
-    if (text_clipped && hovered && g.ActiveId == 0 && IsItemHovered(ImGuiHoveredFlags_DelayNormal))
-        SetTooltip("%.*s", (int)(label_end - label), label);
+    if (text_clipped && hovered && g.ActiveId == 0)
+        SetItemTooltip("%.*s", (int)(label_end - label), label);
 
     // We don't use BeginPopupContextItem() because we want the popup to stay up even after the column is hidden
     if (IsMouseReleased(1) && IsItemHovered())
@@ -3479,12 +3475,12 @@ static void TableSettingsHandler_WriteAll(ImGuiContext* ctx, ImGuiSettingsHandle
             if (!save_column)
                 continue;
             buf->appendf("Column %-2d", column_n);
-            if (column->UserID != 0)                    buf->appendf(" UserID=%08X", column->UserID);
-            if (save_size && column->IsStretch)         buf->appendf(" Weight=%.4f", column->WidthOrWeight);
-            if (save_size && !column->IsStretch)        buf->appendf(" Width=%d", (int)column->WidthOrWeight);
-            if (save_visible)                           buf->appendf(" Visible=%d", column->IsEnabled);
-            if (save_order)                             buf->appendf(" Order=%d", column->DisplayOrder);
-            if (save_sort && column->SortOrder != -1)   buf->appendf(" Sort=%d%c", column->SortOrder, (column->SortDirection == ImGuiSortDirection_Ascending) ? 'v' : '^');
+            if (column->UserID != 0)                    { buf->appendf(" UserID=%08X", column->UserID); }
+            if (save_size && column->IsStretch)         { buf->appendf(" Weight=%.4f", column->WidthOrWeight); }
+            if (save_size && !column->IsStretch)        { buf->appendf(" Width=%d", (int)column->WidthOrWeight); }
+            if (save_visible)                           { buf->appendf(" Visible=%d", column->IsEnabled); }
+            if (save_order)                             { buf->appendf(" Order=%d", column->DisplayOrder); }
+            if (save_sort && column->SortOrder != -1)   { buf->appendf(" Sort=%d%c", column->SortOrder, (column->SortDirection == ImGuiSortDirection_Ascending) ? 'v' : '^'); }
             buf->append("\n");
         }
         buf->append("\n");
@@ -3585,13 +3581,9 @@ static const char* DebugNodeTableGetSizingPolicyDesc(ImGuiTableFlags sizing_poli
 
 void ImGui::DebugNodeTable(ImGuiTable* table)
 {
-    char buf[512];
-    char* p = buf;
-    const char* buf_end = buf + IM_ARRAYSIZE(buf);
-    const bool is_active = (table->LastFrameActive >= ImGui::GetFrameCount() - 2); // Note that fully clipped early out scrolling tables will appear as inactive here.
-    ImFormatString(p, buf_end - p, "Table 0x%08X (%d columns, in '%s')%s", table->ID, table->ColumnsCount, table->OuterWindow->Name, is_active ? "" : " *Inactive*");
+    const bool is_active = (table->LastFrameActive >= GetFrameCount() - 2); // Note that fully clipped early out scrolling tables will appear as inactive here.
     if (!is_active) { PushStyleColor(ImGuiCol_Text, GetStyleColorVec4(ImGuiCol_TextDisabled)); }
-    bool open = TreeNode(table, "%s", buf);
+    bool open = TreeNode(table, "Table 0x%08X (%d columns, in '%s')%s", table->ID, table->ColumnsCount, table->OuterWindow->Name, is_active ? "" : " *Inactive*");
     if (!is_active) { PopStyleColor(); }
     if (IsItemHovered())
         GetForegroundDrawList()->AddRect(table->OuterRect.Min, table->OuterRect.Max, IM_COL32(255, 255, 0, 255));
@@ -3616,6 +3608,7 @@ void ImGui::DebugNodeTable(ImGuiTable* table)
     {
         ImGuiTableColumn* column = &table->Columns[n];
         const char* name = TableGetColumnName(table, n);
+        char buf[512];
         ImFormatString(buf, IM_ARRAYSIZE(buf),
             "Column %d order %d '%s': offset %+.2f to %+.2f%s\n"
             "Enabled: %d, VisibleX/Y: %d/%d, RequestOutput: %d, SkipItems: %d, DrawChannels: %d,%d\n"
